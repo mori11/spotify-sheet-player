@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "cd spotify-sheet-player/frontend && npm install && npm run build"
+  },
+  "deploy": {
+    "startCommand": "cd spotify-sheet-player/frontend && npx serve dist -s -p $PORT",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}

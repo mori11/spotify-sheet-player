@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'http://localhost:3000',
   'https://playnote-frontend.vercel.app',
+  'https://spotify-sheet-player-v2.vercel.app',
   process.env.FRONTEND_URL
 ].filter((origin): origin is string => Boolean(origin));
 
