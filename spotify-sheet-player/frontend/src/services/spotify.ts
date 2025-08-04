@@ -1,9 +1,7 @@
 import axios from 'axios';
 import { getAccessToken, refreshAccessToken, isTokenExpiringSoon } from './auth';
 
-const API_BASE = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : '/api';
+const API_BASE = 'https://spotify-sheet-player-production.up.railway.app/api';
 
 class SpotifyService {
   private async getValidToken(): Promise<string> {
