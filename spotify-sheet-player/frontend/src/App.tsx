@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import CallbackPage from './pages/CallbackPage'
 
+// Force rebuild for Vercel deployment - v2
+
 function App() {
   return (
     <Router>
