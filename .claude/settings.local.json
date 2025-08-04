@@ -13,7 +13,9 @@
       "Bash(rm:*)",
       "Bash(echo \"GitHubでリポジトリを作成後、以下のコマンドを実行してください：\n\n# リモートリポジトリを追加（YOUR_USERNAME を実際のGitHubユーザー名に置き換え）\ngit remote add origin https://github.com/YOUR_USERNAME/spotify-sheet-player.git\n\n# mainブランチにプッシュ\ngit push -u origin main\")",
       "Bash(git push:*)",
-      "Bash(git remote add:*)"
+      "Bash(git remote add:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)"
     ],
     "deny": []
   }
