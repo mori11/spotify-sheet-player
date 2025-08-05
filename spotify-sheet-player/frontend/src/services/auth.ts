@@ -10,8 +10,27 @@ export interface AuthTokens {
 }
 
 export const getAuthUrl = async (): Promise<string> => {
-  const response = await axios.get(`${API_BASE}/auth/login`);
-  return response.data.authUrl;
+  try {
+    const response = await axios.get(`${API_BASE}/auth/login`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // ブラウザ拡張機能による干渉を回避
+      withCredentials: false,
+    });
+    return response.data.authUrl;
+  } catch (error: any) {
+    console.error('Auth URL request failed:', error);
+    
+    // より詳細なエラー情報を提供
+    if (error.response) {
+      throw new Error(`サーバーエラー: ${error.response.status} ${error.response.statusText}`);
+    } else if (error.request) {
+      throw new Error('サーバーに接続できません。ネットワーク接続を確認してください。');
+    } else {
+      throw new Error('認証の初期化に失敗しました。');
+    }
+  }
 };
 
 export const handleAuthCallback = async (code: string): Promise<AuthTokens> => {
