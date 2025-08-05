@@ -17,16 +17,19 @@ function SpotifyAuth() {
       const left = (window.innerWidth - width) / 2;
       const top = (window.innerHeight - height) / 2;
       
-      window.open(
+      const authWindow = window.open(
         authUrl, 
         'spotify-auth',
         `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
       );
       
       // ポップアップがブロックされた場合は通常のリダイレクトを使用
-      setTimeout(() => {
+      if (!authWindow || authWindow.closed || typeof authWindow.closed === 'undefined') {
         window.location.href = authUrl;
-      }, 1000);
+      }
+      
+      // ローディング状態を解除
+      setIsLoading(false);
       
     } catch (error: any) {
       console.error('Failed to get auth URL:', error);
