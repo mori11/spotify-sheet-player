@@ -33,14 +33,34 @@ function Player() {
       setCurrentTrack(data);
       
       if (data?.item?.id) {
-        const features = await spotifyService.getAudioFeatures(data.item.id);
-        setAudioFeatures(features);
+        try {
+          const features = await spotifyService.getAudioFeatures(data.item.id);
+          setAudioFeatures(features);
+        } catch (featuresError: any) {
+          console.warn('Audio features not available:', featuresError);
+          // Audio featuresが取得できなくても基本機能は動作させる
+          setAudioFeatures(null);
+        }
       }
       
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching currently playing:', err);
-      setError('楽曲情報の取得に失敗しました');
+      
+      // より詳細なエラーメッセージを表示
+      if (err.response?.status === 403) {
+        setError('アクセス権限がありません。再度ログインしてください。');
+      } else if (err.response?.status === 401) {
+        setError('認証の有効期限が切れました。再度ログインしてください。');
+        setTimeout(() => {
+          logout();
+          window.location.reload();
+        }, 3000);
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('楽曲情報の取得に失敗しました');
+      }
     } finally {
       setIsLoading(false);
     }
