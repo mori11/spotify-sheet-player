@@ -93,16 +93,27 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
     <div className="bg-gray-900 rounded-lg p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold">楽譜</h3>
-        <button
-          onClick={() => {
-            console.log('Button clicked!');
-            generateSheet();
-          }}
-          disabled={isGenerating}
-          className="bg-spotify-green hover:bg-green-600 disabled:bg-gray-500 text-white px-4 py-2 rounded text-sm"
-        >
-          {isGenerating ? '生成中...' : '楽譜を生成'}
-        </button>
+        <div className="space-x-2">
+          <button
+            onClick={() => {
+              console.log('TEST BUTTON CLICKED!');
+              alert('テストボタンがクリックされました！');
+            }}
+            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+          >
+            テスト
+          </button>
+          <button
+            onClick={() => {
+              console.log('MAIN Button clicked!');
+              generateSheet();
+            }}
+            disabled={isGenerating}
+            className="bg-spotify-green hover:bg-green-600 disabled:bg-gray-500 text-white px-4 py-2 rounded text-sm"
+          >
+            {isGenerating ? '生成中...' : '楽譜を生成'}
+          </button>
+        </div>
       </div>
 
       {error ? (
@@ -122,6 +133,28 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
         </div>
       ) : (
         <div>
+          <div className="mb-4">
+            <button
+              onClick={() => {
+                console.log('FORCE GENERATE CLICKED!');
+                if (sheetRef.current) {
+                  sheetRef.current.innerHTML = `
+                    <div style="padding: 20px; background: white; color: black;">
+                      <h3>強制生成テスト</h3>
+                      <p>トラック: ${track?.name || 'Unknown'}</p>
+                      <p>アーティスト: ${track?.artists?.[0]?.name || 'Unknown'}</p>
+                      <p>時刻: ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                  `;
+                } else {
+                  alert('sheetRef.current is null!');
+                }
+              }}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs mr-2"
+            >
+              強制生成テスト
+            </button>
+          </div>
           <div
             ref={sheetRef}
             className="bg-white rounded p-4 min-h-[300px] overflow-x-auto"
