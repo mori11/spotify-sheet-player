@@ -27,14 +27,23 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
   const [error, setError] = useState<string | null>(null);
 
   const generateSheet = async () => {
-    if (!sheetRef.current) return;
+    console.log('Generate sheet button clicked!');
+    console.log('sheetRef.current:', sheetRef.current);
+    console.log('audioFeatures:', audioFeatures);
+    console.log('track:', track);
+    
+    if (!sheetRef.current) {
+      console.error('sheetRef.current is null!');
+      return;
+    }
 
     setIsGenerating(true);
     setError(null);
+    console.log('Starting sheet generation...');
 
     try {
       // Clear previous sheet
-      sheetRef.current.innerHTML = '';
+      sheetRef.current.innerHTML = '<div style="padding: 20px;">楽譜を生成中...</div>';
       
       // Generate basic sheet music with default values if no audio features
       const defaultFeatures = audioFeatures || {
@@ -44,6 +53,8 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
         time_signature: 4 // 4/4 time
       };
       
+      console.log('Using features:', defaultFeatures);
+      
       await generateBasicSheet(sheetRef.current, defaultFeatures);
     } catch (err) {
       console.error('Error generating sheet with VexFlow:', err);
@@ -51,18 +62,23 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
       
       try {
         // VexFlowが失敗した場合、高度な楽譜を生成
+        console.log('Trying advanced sheet generation...');
         generateAdvancedSheet(sheetRef.current, defaultFeatures, track);
+        console.log('Advanced sheet generation completed');
       } catch (simpleErr) {
         console.error('Error generating advanced sheet:', simpleErr);
         // 最終的なフォールバック
         try {
+          console.log('Trying simple sheet generation...');
           generateSimpleSheet(sheetRef.current, defaultFeatures);
+          console.log('Simple sheet generation completed');
         } catch (finalErr) {
           console.error('Error generating simple sheet:', finalErr);
           setError('楽譜の生成に失敗しました');
         }
       }
     } finally {
+      console.log('Sheet generation process completed');
       setIsGenerating(false);
     }
   };
@@ -78,7 +94,10 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold">楽譜</h3>
         <button
-          onClick={generateSheet}
+          onClick={() => {
+            console.log('Button clicked!');
+            generateSheet();
+          }}
           disabled={isGenerating}
           className="bg-spotify-green hover:bg-green-600 disabled:bg-gray-500 text-white px-4 py-2 rounded text-sm"
         >
