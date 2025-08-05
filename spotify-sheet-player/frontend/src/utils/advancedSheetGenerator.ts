@@ -27,12 +27,12 @@ const musicTheory: MusicTheory = {
   }
 };
 
-// 音名とMIDIノート番号の対応
-const noteToMidi: { [key: string]: number } = {
-  'C': 60, 'C#': 61, 'Db': 61, 'D': 62, 'D#': 63, 'Eb': 63,
-  'E': 64, 'F': 65, 'F#': 66, 'Gb': 66, 'G': 67, 'G#': 68,
-  'Ab': 68, 'A': 69, 'A#': 70, 'Bb': 70, 'B': 71
-};
+// 音名とMIDIノート番号の対応（将来の機能拡張用）
+// const noteToMidi: { [key: string]: number } = {
+//   'C': 60, 'C#': 61, 'Db': 61, 'D': 62, 'D#': 63, 'Eb': 63,
+//   'E': 64, 'F': 65, 'F#': 66, 'Gb': 66, 'G': 67, 'G#': 68,
+//   'Ab': 68, 'A': 69, 'A#': 70, 'Bb': 70, 'B': 71
+// };
 
 // スケール生成
 function generateScale(rootNote: number, isMinor: boolean): number[] {
@@ -50,7 +50,8 @@ function generateScale(rootNote: number, isMinor: boolean): number[] {
   return scale;
 }
 
-// メロディー生成アルゴリズム
+// メロディー生成アルゴリズム（将来の機能拡張用）
+/*
 function generateMelody(scale: number[], tempo: number, timeSignature: number): any[] {
   const melody = [];
   const measures = 4; // 4小節生成
@@ -74,8 +75,10 @@ function generateMelody(scale: number[], tempo: number, timeSignature: number): 
   
   return melody;
 }
+*/
 
-// コード進行生成
+// コード進行生成（将来の機能拡張用）
+/*
 function generateChords(key: number, mode: number, tempo: number): any[] {
   const chordType = tempo > 140 ? 'rock' : (tempo < 80 ? 'jazz' : 'pop');
   const progression = musicTheory.chordProgressions[chordType];
@@ -86,6 +89,7 @@ function generateChords(key: number, mode: number, tempo: number): any[] {
     position: index
   }));
 }
+*/
 
 export const generateAdvancedSheet = (container: HTMLElement, audioFeatures: any, trackInfo?: any) => {
   console.log('Generating advanced sheet music...');
@@ -189,7 +193,7 @@ function generateChordProgression(key: string, mode: string, tempo: number): str
 }
 
 // リズム記譜の生成
-function generateRhythmNotation(timeSignature: number, tempo: number): string {
+function generateRhythmNotation(_timeSignature: number, tempo: number): string {
   const fastRhythm = '♪ ♪ ♪ ♪ | ♪ ♪ ♪ ♪';
   const slowRhythm = '♩ ♩ ♩ ♩ | ♩ ♩ ♩ ♩';
   const mixedRhythm = '♩ ♪♪ ♩ ♩ | ♩ ♪♪ ♩ ♩';

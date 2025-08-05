@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { generateBasicSheet } from '../../utils/sheetGenerator';
 import { generateSimpleSheet } from '../../utils/simpleSheetGenerator';
 import { generateAdvancedSheet } from '../../utils/advancedSheetGenerator';
+import { ClientSidePDFGenerator } from '../../utils/pdfGenerator';
 
 interface Track {
   id: string;
@@ -25,6 +26,7 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pdfGenerator] = useState(() => new ClientSidePDFGenerator());
 
   const generateSheet = async () => {
     console.log('Generate sheet button clicked!');
@@ -60,17 +62,24 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
       console.error('Error generating sheet with VexFlow:', err);
       console.log('Falling back to simple sheet generation');
       
+      const fallbackFeatures = audioFeatures || {
+        key: 0, // C major
+        mode: 1, // Major
+        tempo: 120, // Default tempo
+        time_signature: 4 // 4/4 time
+      };
+      
       try {
         // VexFlowが失敗した場合、高度な楽譜を生成
         console.log('Trying advanced sheet generation...');
-        generateAdvancedSheet(sheetRef.current, defaultFeatures, track);
+        generateAdvancedSheet(sheetRef.current, fallbackFeatures, track);
         console.log('Advanced sheet generation completed');
       } catch (simpleErr) {
         console.error('Error generating advanced sheet:', simpleErr);
         // 最終的なフォールバック
         try {
           console.log('Trying simple sheet generation...');
-          generateSimpleSheet(sheetRef.current, defaultFeatures);
+          generateSimpleSheet(sheetRef.current, fallbackFeatures);
           console.log('Simple sheet generation completed');
         } catch (finalErr) {
           console.error('Error generating simple sheet:', finalErr);
@@ -80,6 +89,16 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
     } finally {
       console.log('Sheet generation process completed');
       setIsGenerating(false);
+    }
+  };
+
+  const handlePDFDownload = async () => {
+    console.log('PDF download button clicked!');
+    try {
+      await pdfGenerator.generatePDF(track, audioFeatures);
+    } catch (error) {
+      console.error('PDF生成エラー:', error);
+      alert('PDF生成に失敗しました');
     }
   };
 
@@ -104,14 +123,10 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
             テスト
           </button>
           <button
-            onClick={() => {
-              console.log('MAIN Button clicked!');
-              generateSheet();
-            }}
-            disabled={isGenerating}
-            className="bg-spotify-green hover:bg-green-600 disabled:bg-gray-500 text-white px-4 py-2 rounded text-sm"
+            onClick={handlePDFDownload}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm"
           >
-            {isGenerating ? '生成中...' : '楽譜を生成'}
+            📄 フル楽譜PDF生成
           </button>
         </div>
       </div>
