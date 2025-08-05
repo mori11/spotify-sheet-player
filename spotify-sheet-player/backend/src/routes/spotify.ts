@@ -15,9 +15,18 @@ router.get('/currently-playing', async (req, res) => {
     const spotifyService = new SpotifyApiService(token);
     const currentTrack = await spotifyService.getCurrentlyPlaying();
     res.json(currentTrack);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching currently playing:', error);
-    res.status(500).json({ error: 'Failed to fetch currently playing track' });
+    
+    // Spotifyのエラーレスポンスを詳細に返す
+    if (error.response) {
+      return res.status(error.response.status).json({ 
+        error: error.response.data.error || 'Spotify API error',
+        message: error.response.data.error_description || error.message
+      });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch currently playing track', message: error.message });
   }
 });
 
@@ -34,9 +43,18 @@ router.get('/audio-features/:trackId', async (req, res) => {
     const spotifyService = new SpotifyApiService(token);
     const audioFeatures = await spotifyService.getAudioFeatures(trackId);
     res.json(audioFeatures);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching audio features:', error);
-    res.status(500).json({ error: 'Failed to fetch audio features' });
+    
+    // Spotifyのエラーレスポンスを詳細に返す
+    if (error.response) {
+      return res.status(error.response.status).json({ 
+        error: error.response.data.error || 'Spotify API error',
+        message: error.response.data.error_description || error.message
+      });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch audio features', message: error.message });
   }
 });
 
@@ -53,9 +71,18 @@ router.get('/audio-analysis/:trackId', async (req, res) => {
     const spotifyService = new SpotifyApiService(token);
     const audioAnalysis = await spotifyService.getAudioAnalysis(trackId);
     res.json(audioAnalysis);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching audio analysis:', error);
-    res.status(500).json({ error: 'Failed to fetch audio analysis' });
+    
+    // Spotifyのエラーレスポンスを詳細に返す
+    if (error.response) {
+      return res.status(error.response.status).json({ 
+        error: error.response.data.error || 'Spotify API error',
+        message: error.response.data.error_description || error.message
+      });
+    }
+    
+    res.status(500).json({ error: 'Failed to fetch audio analysis', message: error.message });
   }
 });
 
