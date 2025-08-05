@@ -24,10 +24,13 @@ const majorScales = [
 ];
 
 export const generateBasicSheet = async (container: HTMLElement, audioFeatures: AudioFeatures) => {
-  // Create renderer
-  const renderer = new Renderer(container as HTMLDivElement, Renderer.Backends.SVG);
-  renderer.resize(800, 200);
-  const context = renderer.getContext();
+  try {
+    console.log('Generating sheet music with features:', audioFeatures);
+    
+    // Create renderer
+    const renderer = new Renderer(container as HTMLDivElement, Renderer.Backends.SVG);
+    renderer.resize(800, 200);
+    const context = renderer.getContext();
 
   // Create stave
   const stave = new Stave(10, 40, 780);
@@ -49,6 +52,12 @@ export const generateBasicSheet = async (container: HTMLElement, audioFeatures: 
   // Format and draw
   new Formatter().joinVoices([voice]).format([voice], 750);
   voice.draw(context, stave);
+  
+  console.log('Sheet music generated successfully');
+  } catch (error) {
+    console.error('Error generating sheet music:', error);
+    throw error;
+  }
 };
 
 const getKeySignatureForVexFlow = (key: number, mode: number): string => {

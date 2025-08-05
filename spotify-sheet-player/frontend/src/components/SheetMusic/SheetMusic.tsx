@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { generateBasicSheet } from '../../utils/sheetGenerator';
+import { generateSimpleSheet } from '../../utils/simpleSheetGenerator';
 
 interface Track {
   id: string;
@@ -44,8 +45,16 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
       
       await generateBasicSheet(sheetRef.current, defaultFeatures);
     } catch (err) {
-      console.error('Error generating sheet:', err);
-      setError('楽譜の生成に失敗しました');
+      console.error('Error generating sheet with VexFlow:', err);
+      console.log('Falling back to simple sheet generation');
+      
+      try {
+        // VexFlowが失敗した場合、シンプルな楽譜を生成
+        generateSimpleSheet(sheetRef.current, defaultFeatures);
+      } catch (simpleErr) {
+        console.error('Error generating simple sheet:', simpleErr);
+        setError('楽譜の生成に失敗しました');
+      }
     } finally {
       setIsGenerating(false);
     }
