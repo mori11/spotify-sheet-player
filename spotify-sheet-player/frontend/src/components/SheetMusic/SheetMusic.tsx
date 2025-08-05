@@ -25,7 +25,7 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
   const [error, setError] = useState<string | null>(null);
 
   const generateSheet = async () => {
-    if (!sheetRef.current || !audioFeatures) return;
+    if (!sheetRef.current) return;
 
     setIsGenerating(true);
     setError(null);
@@ -34,8 +34,15 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
       // Clear previous sheet
       sheetRef.current.innerHTML = '';
       
-      // Generate basic sheet music based on audio features
-      await generateBasicSheet(sheetRef.current, audioFeatures);
+      // Generate basic sheet music with default values if no audio features
+      const defaultFeatures = audioFeatures || {
+        key: 0, // C major
+        mode: 1, // Major
+        tempo: 120, // Default tempo
+        time_signature: 4 // 4/4 time
+      };
+      
+      await generateBasicSheet(sheetRef.current, defaultFeatures);
     } catch (err) {
       console.error('Error generating sheet:', err);
       setError('楽譜の生成に失敗しました');
@@ -45,10 +52,10 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
   };
 
   useEffect(() => {
-    if (track && audioFeatures) {
+    if (track) {
       generateSheet();
     }
-  }, [track, audioFeatures]);
+  }, [track]);
 
   return (
     <div className="bg-gray-900 rounded-lg p-6">
@@ -56,18 +63,14 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
         <h3 className="text-xl font-bold">楽譜</h3>
         <button
           onClick={generateSheet}
-          disabled={isGenerating || !audioFeatures}
+          disabled={isGenerating}
           className="bg-spotify-green hover:bg-green-600 disabled:bg-gray-500 text-white px-4 py-2 rounded text-sm"
         >
           {isGenerating ? '生成中...' : '楽譜を生成'}
         </button>
       </div>
 
-      {!audioFeatures ? (
-        <div className="text-center py-16 text-spotify-gray">
-          <p>楽曲の分析データを取得中...</p>
-        </div>
-      ) : error ? (
+      {error ? (
         <div className="text-center py-16 text-red-400">
           <p>{error}</p>
           <button
@@ -90,6 +93,11 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
           />
           
           <div className="mt-4 text-sm text-spotify-gray">
+            {!audioFeatures && (
+              <p className="mb-2 text-yellow-400">
+                ⚠️ 楽曲の詳細分析データが取得できないため、デフォルト設定で楽譜を生成しました
+              </p>
+            )}
             <p className="mb-2">
               ※ これは音楽分析データに基づく簡易的な楽譜です
             </p>
