@@ -114,17 +114,8 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
         <h3 className="text-xl font-bold">楽譜</h3>
         <div className="space-x-2">
           <button
-            onClick={() => {
-              console.log('TEST BUTTON CLICKED!');
-              alert('テストボタンがクリックされました！');
-            }}
-            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
-          >
-            テスト
-          </button>
-          <button
             onClick={handlePDFDownload}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm"
+            className="bg-spotify-green hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
           >
             📄 フル楽譜PDF生成
           </button>
@@ -148,38 +139,25 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
         </div>
       ) : (
         <div>
-          <div className="mb-4">
-            <button
-              onClick={() => {
-                console.log('FORCE GENERATE CLICKED!');
-                if (sheetRef.current) {
-                  sheetRef.current.innerHTML = `
-                    <div style="padding: 20px; background: white; color: black;">
-                      <h3>強制生成テスト</h3>
-                      <p>トラック: ${track?.name || 'Unknown'}</p>
-                      <p>アーティスト: ${track?.artists?.[0]?.name || 'Unknown'}</p>
-                      <p>時刻: ${new Date().toLocaleTimeString()}</p>
-                    </div>
-                  `;
-                } else {
-                  alert('sheetRef.current is null!');
-                }
-              }}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs mr-2"
-            >
-              強制生成テスト
-            </button>
-          </div>
           <div
             ref={sheetRef}
             className="bg-white rounded p-4 min-h-[300px] overflow-x-auto"
           />
           
           <div className="mt-4 text-sm text-spotify-gray">
-            {!audioFeatures && (
+            {!audioFeatures ? (
               <p className="mb-2 text-yellow-400">
                 ⚠️ 楽曲の詳細分析データが取得できないため、デフォルト設定で楽譜を生成しました
               </p>
+            ) : (
+              <p className="mb-2 text-green-400">
+                ✅ 楽曲の詳細分析データを使用して楽譜を生成しました
+              </p>
+            )}
+            {audioFeatures && (
+              <div className="mb-2 text-xs bg-gray-800 p-2 rounded">
+                <p>デバッグ情報: キー={audioFeatures.key}, モード={audioFeatures.mode}, テンポ={Math.round(audioFeatures.tempo || 120)}</p>
+              </div>
             )}
             <p className="mb-2">
               ※ これは音楽分析データに基づく簡易的な楽譜です

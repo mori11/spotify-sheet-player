@@ -34,10 +34,14 @@ function Player() {
       
       if (data?.item?.id) {
         try {
+          console.log('Fetching audio features for track:', data.item.id);
           const features = await spotifyService.getAudioFeatures(data.item.id);
+          console.log('Audio features received:', features);
           setAudioFeatures(features);
         } catch (featuresError: any) {
           console.warn('Audio features not available:', featuresError);
+          console.warn('Error details:', featuresError.response?.data);
+          console.warn('Error status:', featuresError.response?.status);
           // Audio featuresが取得できなくても基本機能は動作させる
           setAudioFeatures(null);
         }
