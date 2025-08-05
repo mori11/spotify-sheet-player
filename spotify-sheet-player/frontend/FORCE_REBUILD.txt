@@ -1,2 +1,4 @@
-Build timestamp: 2025-08-04-13:10:00
+Build timestamp: 2025-08-05-09:15:00
 Force complete rebuild with new hash
+Version: 0.4.0
+Clear Vercel cache to use correct Railway API URL
