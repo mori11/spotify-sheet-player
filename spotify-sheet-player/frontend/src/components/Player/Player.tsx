@@ -3,6 +3,7 @@ import { spotifyService } from '../../services/spotify';
 import { logout } from '../../services/auth';
 import CurrentTrack from './CurrentTrack';
 import SheetMusic from '../SheetMusic/SheetMusic';
+import Lyrics from '../Lyrics/Lyrics';
 
 interface Track {
   id: string;
@@ -26,6 +27,7 @@ function Player() {
   const [audioFeatures, setAudioFeatures] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'sheet' | 'lyrics'>('sheet');
 
   const fetchCurrentlyPlaying = async () => {
     try {
@@ -136,10 +138,42 @@ function Player() {
           </div>
           
           <div>
-            <SheetMusic 
-              track={currentTrack.item}
-              audioFeatures={audioFeatures}
-            />
+            <div className="flex space-x-2 mb-4">
+              <button
+                onClick={() => setActiveTab('sheet')}
+                className={`px-4 py-2 rounded ${
+                  activeTab === 'sheet' 
+                    ? 'bg-spotify-green text-white' 
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                楽譜
+              </button>
+              <button
+                onClick={() => setActiveTab('lyrics')}
+                className={`px-4 py-2 rounded ${
+                  activeTab === 'lyrics' 
+                    ? 'bg-spotify-green text-white' 
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                歌詞
+              </button>
+            </div>
+            
+            {activeTab === 'sheet' ? (
+              <SheetMusic 
+                track={currentTrack.item}
+                audioFeatures={audioFeatures}
+              />
+            ) : (
+              <Lyrics
+                track={currentTrack.item}
+                progress_ms={currentTrack.progress_ms}
+                is_playing={currentTrack.is_playing}
+                audioFeatures={audioFeatures}
+              />
+            )}
           </div>
         </div>
       )}

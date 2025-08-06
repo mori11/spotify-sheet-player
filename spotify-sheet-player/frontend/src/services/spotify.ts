@@ -58,6 +58,27 @@ class SpotifyService {
     
     return response.data;
   }
+
+  async getLyrics(trackId: string) {
+    const token = await this.getValidToken();
+    
+    try {
+      const response = await axios.get(`${API_BASE}/spotify/lyrics/${trackId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      // 歌詞が取得できない場合はサンプルデータを返す
+      console.warn('Lyrics not available, returning sample data');
+      return {
+        lines: [],
+        syncType: 'LINE_SYNCED'
+      };
+    }
+  }
 }
 
 export const spotifyService = new SpotifyService();

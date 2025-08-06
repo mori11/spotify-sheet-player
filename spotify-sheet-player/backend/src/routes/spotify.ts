@@ -86,4 +86,39 @@ router.get('/audio-analysis/:trackId', async (req, res) => {
   }
 });
 
+router.get('/lyrics/:trackId', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.replace('Bearer ', '');
+  const { trackId } = req.params;
+  
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });  
+  }
+
+  try {
+    const spotifyService = new SpotifyApiService(token);
+    // 注: Spotify Web APIには公式の歌詞エンドポイントがありません
+    // 実装には代替手段が必要です（Musixmatch API、Genius APIなど）
+    
+    // デモ用のサンプルレスポンス
+    const sampleLyrics = {
+      lines: [
+        { startTimeMs: 0, words: '♪ イントロ ♪' },
+        { startTimeMs: 10000, words: 'ここに歌詞が表示されます' },
+        { startTimeMs: 20000, words: 'Spotifyの歌詞APIが利用可能になると' },
+        { startTimeMs: 30000, words: 'リアルタイムで歌詞が同期されます' },
+        { startTimeMs: 40000, words: 'カラオケのように楽しめます' },
+      ],
+      syncType: 'LINE_SYNCED',
+      language: 'ja',
+      isRtlLanguage: false
+    };
+    
+    res.json(sampleLyrics);
+  } catch (error: any) {
+    console.error('Error fetching lyrics:', error);
+    res.status(500).json({ error: 'Failed to fetch lyrics', message: error.message });
+  }
+});
+
 export default router;
