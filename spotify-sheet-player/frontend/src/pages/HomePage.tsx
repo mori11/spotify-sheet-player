@@ -14,12 +14,12 @@ function HomePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-center mb-8 text-spotify-green">
-        Spotify Sheet Player
+        Spotify Music Analyzer
       </h1>
       
       {!isAuthenticated ? (
         <div className="flex flex-col items-center">
-          <p className="text-xl mb-8">Spotifyと連携して楽譜を自動生成します</p>
+          <p className="text-xl mb-8">Spotifyと連携して楽曲の感情分析を行います</p>
           <SpotifyAuth />
         </div>
       ) : (

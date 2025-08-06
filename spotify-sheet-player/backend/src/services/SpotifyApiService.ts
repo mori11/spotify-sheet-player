@@ -110,39 +110,6 @@ export class SpotifyApiService {
     return response.data;
   }
 
-  async getLyricsFromExternal(artist: string, title: string) {
-    try {
-      // Lyrics.ovh APIを使用（完全無料）
-      const response = await axios.get(
-        `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`,
-        { timeout: 10000 }
-      );
-      
-      if (response.data.lyrics) {
-        // 歌詞を行ごとに分割
-        const lines = response.data.lyrics
-          .split('\n')
-          .filter((line: string) => line.trim().length > 0)
-          .map((line: string, index: number) => ({
-            startTimeMs: index * 3000, // 仮の3秒間隔
-            words: line.trim()
-          }));
-
-        return {
-          lines,
-          syncType: 'LINE_SYNCED',
-          language: 'unknown',
-          isRtlLanguage: false,
-          source: 'lyrics.ovh'
-        };
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Failed to fetch lyrics from external API:', error);
-      return null;
-    }
-  }
 
   async getUserProfile() {
     const response = await axios.get(`${this.baseURL}/me`, {
