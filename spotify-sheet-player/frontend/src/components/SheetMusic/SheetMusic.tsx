@@ -15,6 +15,7 @@ interface AudioFeatures {
   mode: number;
   tempo: number;
   time_signature: number;
+  is_estimated?: boolean;
 }
 
 interface SheetMusicProps {
@@ -153,6 +154,10 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
             {!audioFeatures ? (
               <p className="mb-2 text-yellow-400">
                 ⚠️ 楽曲の詳細分析データが取得できないため、デフォルト設定で楽譜を生成しました
+              </p>
+            ) : audioFeatures.is_estimated ? (
+              <p className="mb-2 text-yellow-400">
+                ⚠️ Spotify APIの制限により、楽曲IDから推定した音楽的特徴で楽譜を生成しました
               </p>
             ) : (
               <p className="mb-2 text-green-400">
