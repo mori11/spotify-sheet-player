@@ -92,9 +92,10 @@ function generateChords(key: number, mode: number, tempo: number): any[] {
 */
 
 export const generateAdvancedSheet = (container: HTMLElement, audioFeatures: any, trackInfo?: any) => {
-  console.log('Generating advanced sheet music...');
+  console.log('=== Generating advanced sheet music ===');
   console.log('Track:', trackInfo?.name, 'ID:', trackInfo?.id);
-  console.log('Audio Features:', audioFeatures);
+  console.log('Audio Features:', JSON.stringify(audioFeatures));
+  console.log('Track Info:', JSON.stringify(trackInfo));
   
   const key = audioFeatures?.key ?? 0;
   const mode = audioFeatures?.mode ?? 1; // 1 = major, 0 = minor
@@ -173,10 +174,10 @@ export const generateAdvancedSheet = (container: HTMLElement, audioFeatures: any
       <div style="border: 2px solid #333; padding: 20px; background: #fafafa;">
         <h4 style="font-size: 16px; margin-bottom: 15px; color: #333;">リズムパターン（${timeSignature}/4拍子）</h4>
         <div style="font-size: 24px; text-align: center; margin: 20px 0;">
-          ${generateRhythmNotation(timeSignature, tempo)}
+          ${generateRhythmNotation(timeSignature, tempo, trackInfo?.id)}
         </div>
         <div style="font-size: 20px; text-align: center; margin: 20px 0; line-height: 2;">
-          ${generateMelodyNotation(japaneseScaleNotes, timeSignature, key, mode, energy)}
+          ${generateMelodyNotation(japaneseScaleNotes, timeSignature, key, mode, energy, trackInfo?.id)}
         </div>
       </div>
       
@@ -238,7 +239,7 @@ function generateChordProgression(key: string, mode: string, tempo: number): str
 }
 
 // リズム記譜の生成
-function generateRhythmNotation(timeSignature: number, tempo: number): string {
+function generateRhythmNotation(timeSignature: number, tempo: number, trackId?: string): string {
   const rhythmPatterns: { [key: string]: string[] } = {
     '3': ['♩ ♩ ♩', '♪♪ ♪♪ ♪♪', '♩. ♪ ♩'],
     '4': ['♩ ♩ ♩ ♩', '♪ ♪ ♪ ♪', '♩ ♪♪ ♩ ♩', '♩. ♪ ♩ ♩'],
@@ -249,22 +250,37 @@ function generateRhythmNotation(timeSignature: number, tempo: number): string {
   
   const patterns = rhythmPatterns[timeSignature.toString()] || rhythmPatterns['4'];
   
-  // テンポに基づいてパターンを選択
-  let patternIndex = 0;
+  // トラックIDのハッシュ値を計算
+  const trackIdHash = trackId ? 
+    trackId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : 0;
+  
+  // テンポとトラックIDに基づいてパターンを選択
+  let baseIndex = 0;
   if (tempo > 140) {
-    patternIndex = 1; // 速いテンポは8分音符メイン
+    baseIndex = 1; // 速いテンポは8分音符メイン
   } else if (tempo < 80) {
-    patternIndex = 0; // 遅いテンポは4分音符メイン
+    baseIndex = 0; // 遅いテンポは4分音符メイン
   } else {
-    patternIndex = 2; // 中間テンポは混合
+    baseIndex = 2; // 中間テンポは混合
   }
   
-  const selectedPattern = patterns[Math.min(patternIndex, patterns.length - 1)];
-  return `${selectedPattern} | ${selectedPattern}`;
+  const patternIndex = (baseIndex + trackIdHash) % patterns.length;
+  const selectedPattern = patterns[patternIndex];
+  
+  // 2小節分のリズムパターンを生成（変化を加える）
+  const variation = trackIdHash % 3;
+  if (variation === 0) {
+    return `${selectedPattern} | ${selectedPattern}`;
+  } else if (variation === 1) {
+    const altPattern = patterns[(patternIndex + 1) % patterns.length];
+    return `${selectedPattern} | ${altPattern}`;
+  } else {
+    return `${selectedPattern} | ${selectedPattern.split(' ').reverse().join(' ')}`;
+  }
 }
 
 // メロディー記譜の生成
-function generateMelodyNotation(scale: string[], timeSignature: number, key: number, mode: number, energy: number): string {
+function generateMelodyNotation(scale: string[], timeSignature: number, key: number, mode: number, energy: number, trackId?: string): string {
   const melody = [];
   
   // キーとモードに基づいた音楽的パターン
@@ -282,10 +298,16 @@ function generateMelodyNotation(scale: string[], timeSignature: number, key: num
     [7, 6, 5, 4, 3, 2, 1, 0], // 音階下降
   ];
   
-  // エネルギーレベルとキーに基づいてパターンを選択
+  // トラックIDのハッシュ値を計算して、曲ごとに異なるパターンを選択
+  const trackIdHash = trackId ? 
+    trackId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : 0;
+  
+  // エネルギーレベル、キー、トラックIDに基づいてパターンを選択
   const patterns = mode === 1 ? majorPatterns : minorPatterns;
-  const patternIndex = (key + Math.floor(energy * 10)) % patterns.length;
+  const patternIndex = (key + Math.floor(energy * 10) + trackIdHash) % patterns.length;
   const pattern = patterns[patternIndex];
+  
+  console.log(`Pattern selection: trackIdHash=${trackIdHash}, key=${key}, energy=${energy}, patternIndex=${patternIndex}`);
   
   // メロディーを生成（小節数分）
   for (let measure = 0; measure < 2; measure++) {
