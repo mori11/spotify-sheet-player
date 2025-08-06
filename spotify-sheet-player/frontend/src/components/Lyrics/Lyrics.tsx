@@ -165,7 +165,13 @@ function Lyrics({ track, progress_ms, is_playing, audioFeatures }: LyricsProps) 
       />
 
       <div className="mt-4 text-sm text-spotify-gray">
-        <p>※ 歌詞機能は開発中です。Spotify APIの制限により、実際の歌詞は表示されない場合があります。</p>
+        {lyrics.length > 0 && lyrics[0]?.words && (
+          <div className="mb-2">
+            <p className="text-green-400">✅ 実際の歌詞を表示中</p>
+            <p className="text-xs">データソース: Lyrics.ovh API</p>
+          </div>
+        )}
+        <p>※ 歌詞が見つからない場合があります。英語楽曲の場合、より見つかりやすい傾向があります。</p>
       </div>
     </div>
   );

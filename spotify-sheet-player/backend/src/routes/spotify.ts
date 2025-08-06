@@ -97,24 +97,38 @@ router.get('/lyrics/:trackId', async (req, res) => {
 
   try {
     const spotifyService = new SpotifyApiService(token);
-    // 注: Spotify Web APIには公式の歌詞エンドポイントがありません
-    // 実装には代替手段が必要です（Musixmatch API、Genius APIなど）
     
-    // デモ用のサンプルレスポンス
-    const sampleLyrics = {
-      lines: [
-        { startTimeMs: 0, words: '♪ イントロ ♪' },
-        { startTimeMs: 10000, words: 'ここに歌詞が表示されます' },
-        { startTimeMs: 20000, words: 'Spotifyの歌詞APIが利用可能になると' },
-        { startTimeMs: 30000, words: 'リアルタイムで歌詞が同期されます' },
-        { startTimeMs: 40000, words: 'カラオケのように楽しめます' },
-      ],
-      syncType: 'LINE_SYNCED',
-      language: 'ja',
-      isRtlLanguage: false
-    };
+    // まず、トラック情報を取得
+    const trackInfo = await spotifyService.getTrack(trackId);
+    const artist = trackInfo.artists[0]?.name;
+    const title = trackInfo.name;
     
-    res.json(sampleLyrics);
+    console.log(`Searching lyrics for: ${artist} - ${title}`);
+    
+    // 外部APIから歌詞を取得
+    const lyricsData = await spotifyService.getLyricsFromExternal(artist, title);
+    
+    if (lyricsData) {
+      console.log(`Found lyrics from ${lyricsData.source}`);
+      res.json(lyricsData);
+    } else {
+      // 歌詞が見つからない場合はデフォルト
+      console.log('No lyrics found, returning sample data');
+      const sampleLyrics = {
+        lines: [
+          { startTimeMs: 0, words: '♪ 歌詞が見つかりませんでした ♪' },
+          { startTimeMs: 10000, words: `アーティスト: ${artist}` },
+          { startTimeMs: 20000, words: `楽曲: ${title}` },
+          { startTimeMs: 30000, words: '歌詞データベースに登録されていない可能性があります' },
+        ],
+        syncType: 'LINE_SYNCED',
+        language: 'ja',
+        isRtlLanguage: false,
+        source: 'sample'
+      };
+      
+      res.json(sampleLyrics);
+    }
   } catch (error: any) {
     console.error('Error fetching lyrics:', error);
     res.status(500).json({ error: 'Failed to fetch lyrics', message: error.message });
