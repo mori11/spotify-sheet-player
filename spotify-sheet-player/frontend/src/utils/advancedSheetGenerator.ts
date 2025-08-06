@@ -107,6 +107,9 @@ export const generateAdvancedSheet = (container: HTMLElement, audioFeatures: any
   const keyName = keyNames[key] || 'C';
   const modeName = mode === 1 ? 'メジャー' : 'マイナー';
   
+  // 日本語音名
+  const japaneseNoteNames = ['ド', 'ド♯/レ♭', 'レ', 'レ♯/ミ♭', 'ミ', 'ファ', 'ファ♯/ソ♭', 'ソ', 'ソ♯/ラ♭', 'ラ', 'ラ♯/シ♭', 'シ'];
+  
   // 音楽的特徴から推測
   const style = energy > 0.7 ? 'エネルギッシュ' : (energy < 0.3 ? '穏やか' : 'ミディアム');
   const mood = valence > 0.7 ? '明るい' : (valence < 0.3 ? '暗い' : 'ニュートラル');
@@ -118,6 +121,12 @@ export const generateAdvancedSheet = (container: HTMLElement, audioFeatures: any
     const octave = Math.floor(midi / 12) - 1;
     const noteIndex = midi % 12;
     return keyNames[noteIndex] + octave;
+  });
+  
+  // 日本語音名でのスケール
+  const japaneseScaleNotes = scale.map(midi => {
+    const noteIndex = midi % 12;
+    return japaneseNoteNames[noteIndex];
   });
   
   // HTML楽譜を生成
@@ -167,7 +176,7 @@ export const generateAdvancedSheet = (container: HTMLElement, audioFeatures: any
           ${generateRhythmNotation(timeSignature, tempo)}
         </div>
         <div style="font-size: 20px; text-align: center; margin: 20px 0; line-height: 2;">
-          ${generateMelodyNotation(scaleNotes, timeSignature)}
+          ${generateMelodyNotation(japaneseScaleNotes, timeSignature, key, mode, energy)}
         </div>
       </div>
       
@@ -229,37 +238,64 @@ function generateChordProgression(key: string, mode: string, tempo: number): str
 }
 
 // リズム記譜の生成
-function generateRhythmNotation(_timeSignature: number, tempo: number): string {
-  const fastRhythm = '♪ ♪ ♪ ♪ | ♪ ♪ ♪ ♪';
-  const slowRhythm = '♩ ♩ ♩ ♩ | ♩ ♩ ♩ ♩';
-  const mixedRhythm = '♩ ♪♪ ♩ ♩ | ♩ ♪♪ ♩ ♩';
+function generateRhythmNotation(timeSignature: number, tempo: number): string {
+  const rhythmPatterns: { [key: string]: string[] } = {
+    '3': ['♩ ♩ ♩', '♪♪ ♪♪ ♪♪', '♩. ♪ ♩'],
+    '4': ['♩ ♩ ♩ ♩', '♪ ♪ ♪ ♪', '♩ ♪♪ ♩ ♩', '♩. ♪ ♩ ♩'],
+    '5': ['♩ ♩ ♩ ♩ ♩', '♪♪ ♪♪ ♪♪ ♪♪ ♪', '♩ ♩ ♪♪ ♩ ♩'],
+    '6': ['♩. ♩. ♩. ♩.', '♪ ♪ ♪ ♪ ♪ ♪', '♩ ♪ ♪ ♩ ♪ ♪'],
+    '7': ['♩ ♩ ♩ ♩ ♩ ♩ ♩', '♪♪ ♪♪ ♪♪ ♪♪ ♪♪ ♪♪ ♪']
+  };
   
-  if (tempo > 140) return fastRhythm;
-  if (tempo < 80) return slowRhythm;
-  return mixedRhythm;
+  const patterns = rhythmPatterns[timeSignature.toString()] || rhythmPatterns['4'];
+  
+  // テンポに基づいてパターンを選択
+  let patternIndex = 0;
+  if (tempo > 140) {
+    patternIndex = 1; // 速いテンポは8分音符メイン
+  } else if (tempo < 80) {
+    patternIndex = 0; // 遅いテンポは4分音符メイン
+  } else {
+    patternIndex = 2; // 中間テンポは混合
+  }
+  
+  const selectedPattern = patterns[Math.min(patternIndex, patterns.length - 1)];
+  return `${selectedPattern} | ${selectedPattern}`;
 }
 
 // メロディー記譜の生成
-function generateMelodyNotation(scale: string[], timeSignature: number): string {
+function generateMelodyNotation(scale: string[], timeSignature: number, key: number, mode: number, energy: number): string {
   const melody = [];
   
-  // より音楽的なパターンを生成
-  const patterns = [
-    [0, 2, 4, 2], // 上昇パターン
-    [4, 2, 0, 1], // 下降パターン
-    [0, 4, 2, 5], // アルペジオ風
-    [0, 0, 3, 5], // リピートパターン
+  // キーとモードに基づいた音楽的パターン
+  const majorPatterns = [
+    [0, 2, 4, 5, 4, 2, 0], // ド-レ-ミ-ファ-ミ-レ-ド
+    [0, 4, 3, 2, 1, 0], // ド-ミ-ファ-レ-レ-ド
+    [0, 2, 4, 7, 4, 2, 0], // ド-レ-ミ-ソ-ミ-レ-ド
+    [0, 1, 2, 3, 4, 5, 6, 7], // 音階上昇
   ];
   
-  // スケールの長さに基づいてパターンを選択
-  const patternIndex = scale.length % patterns.length;
+  const minorPatterns = [
+    [0, 2, 3, 5, 3, 2, 0], // マイナー基本
+    [0, 3, 2, 5, 4, 2, 0], // マイナーアルペジオ
+    [0, 2, 3, 2, 0, 5, 0], // マイナー変化
+    [7, 6, 5, 4, 3, 2, 1, 0], // 音階下降
+  ];
+  
+  // エネルギーレベルとキーに基づいてパターンを選択
+  const patterns = mode === 1 ? majorPatterns : minorPatterns;
+  const patternIndex = (key + Math.floor(energy * 10)) % patterns.length;
   const pattern = patterns[patternIndex];
   
-  for (let i = 0; i < timeSignature * 2; i++) {
-    const patternPos = i % pattern.length;
-    const noteIndex = pattern[patternPos] % scale.length;
-    melody.push(scale[noteIndex]);
+  // メロディーを生成（小節数分）
+  for (let measure = 0; measure < 2; measure++) {
+    for (let i = 0; i < timeSignature; i++) {
+      const patternPos = i % pattern.length;
+      const noteIndex = pattern[patternPos] % scale.length;
+      melody.push(scale[noteIndex]);
+    }
+    if (measure === 0) melody.push('|');
   }
   
-  return melody.join(' - ');
+  return melody.join(' ');
 }
