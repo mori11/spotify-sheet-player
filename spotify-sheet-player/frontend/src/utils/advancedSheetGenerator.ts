@@ -93,6 +93,8 @@ function generateChords(key: number, mode: number, tempo: number): any[] {
 
 export const generateAdvancedSheet = (container: HTMLElement, audioFeatures: any, trackInfo?: any) => {
   console.log('Generating advanced sheet music...');
+  console.log('Track:', trackInfo?.name, 'ID:', trackInfo?.id);
+  console.log('Audio Features:', audioFeatures);
   
   const key = audioFeatures?.key ?? 0;
   const mode = audioFeatures?.mode ?? 1; // 1 = major, 0 = minor
@@ -179,16 +181,50 @@ export const generateAdvancedSheet = (container: HTMLElement, audioFeatures: any
 
 // コード進行の生成
 function generateChordProgression(key: string, mode: string, tempo: number): string {
+  // メジャーキーのコード進行（I-V-vi-IV）
+  const majorProgressions: { [key: string]: string } = {
+    'C': 'C - G - Am - F',
+    'C♯/D♭': 'C♯ - G♯ - A♯m - F♯',
+    'D': 'D - A - Bm - G',
+    'D♯/E♭': 'E♭ - B♭ - Cm - A♭',
+    'E': 'E - B - C♯m - A',
+    'F': 'F - C - Dm - B♭',
+    'F♯/G♭': 'F♯ - C♯ - D♯m - B',
+    'G': 'G - D - Em - C',
+    'G♯/A♭': 'A♭ - E♭ - Fm - D♭',
+    'A': 'A - E - F♯m - D',
+    'A♯/B♭': 'B♭ - F - Gm - E♭',
+    'B': 'B - F♯ - G♯m - E'
+  };
+  
+  // マイナーキーのコード進行（i-iv-v-i）
+  const minorProgressions: { [key: string]: string } = {
+    'C': 'Cm - Fm - Gm - Cm',
+    'C♯/D♭': 'C♯m - F♯m - G♯m - C♯m',
+    'D': 'Dm - Gm - Am - Dm',
+    'D♯/E♭': 'E♭m - A♭m - B♭m - E♭m',
+    'E': 'Em - Am - Bm - Em',
+    'F': 'Fm - B♭m - Cm - Fm',
+    'F♯/G♭': 'F♯m - Bm - C♯m - F♯m',
+    'G': 'Gm - Cm - Dm - Gm',
+    'G♯/A♭': 'G♯m - C♯m - D♯m - G♯m',
+    'A': 'Am - Dm - Em - Am',
+    'A♯/B♭': 'B♭m - E♭m - Fm - B♭m',
+    'B': 'Bm - Em - F♯m - Bm'
+  };
+  
   if (mode === 'メジャー') {
+    const progression = majorProgressions[key] || majorProgressions['C'];
     if (tempo > 140) {
-      return `${key} - ${key}7 - ${key} - ${key}7 (パワーコード推奨)`;
+      return `${progression} (パワーコード推奨)`;
     } else if (tempo < 80) {
-      return `${key}M7 - ${key}6 - ${key}M7 - ${key}6 (ジャズ風)`;
+      return `${progression} (ジャズ風にM7やm7を追加)`;
     } else {
-      return `${key} - G - Am - F (ポップス進行)`;
+      return `${progression} (ポップス進行)`;
     }
   } else {
-    return `${key}m - ${key}m7 - ${key}m6 - ${key}m (マイナー進行)`;
+    const progression = minorProgressions[key] || minorProgressions['C'];
+    return `${progression} (マイナー進行)`;
   }
 }
 
@@ -206,9 +242,24 @@ function generateRhythmNotation(_timeSignature: number, tempo: number): string {
 // メロディー記譜の生成
 function generateMelodyNotation(scale: string[], timeSignature: number): string {
   const melody = [];
+  
+  // より音楽的なパターンを生成
+  const patterns = [
+    [0, 2, 4, 2], // 上昇パターン
+    [4, 2, 0, 1], // 下降パターン
+    [0, 4, 2, 5], // アルペジオ風
+    [0, 0, 3, 5], // リピートパターン
+  ];
+  
+  // スケールの長さに基づいてパターンを選択
+  const patternIndex = scale.length % patterns.length;
+  const pattern = patterns[patternIndex];
+  
   for (let i = 0; i < timeSignature * 2; i++) {
-    const noteIndex = i % scale.length;
+    const patternPos = i % pattern.length;
+    const noteIndex = pattern[patternPos] % scale.length;
     melody.push(scale[noteIndex]);
   }
-  return melody.join(' ');
+  
+  return melody.join(' - ');
 }

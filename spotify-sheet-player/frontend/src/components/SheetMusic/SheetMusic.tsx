@@ -106,7 +106,7 @@ function SheetMusic({ track, audioFeatures }: SheetMusicProps) {
     if (track) {
       generateSheet();
     }
-  }, [track]);
+  }, [track, audioFeatures]);
 
   return (
     <div className="bg-gray-900 rounded-lg p-6">
